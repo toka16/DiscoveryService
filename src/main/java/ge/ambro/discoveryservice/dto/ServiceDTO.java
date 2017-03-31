@@ -18,7 +18,7 @@ public class ServiceDTO {
     private String serviceDescrip;
     private String base;
     private List<TargetDTO> targets;
-    private List<EventDTO> event;
+    private List<EventDTO> events;
     private boolean alive;
 
     public int getId() {
@@ -62,11 +62,11 @@ public class ServiceDTO {
     }
 
     public List<EventDTO> getEvent() {
-        return event;
+        return events;
     }
 
     public void setEvent(List<EventDTO> event) {
-        this.event = event;
+        this.events = event;
     }
 
     public boolean isAlive() {
@@ -79,7 +79,7 @@ public class ServiceDTO {
 
     @Override
     public String toString() {
-        return "ServiceDTO{" + "id=" + id + ", name=" + name + ", serviceDescrip=" + serviceDescrip + ", base=" + base + ", targets=" + targets + ", event=" + event + ", alive=" + alive + '}';
+        return "ServiceDTO{" + "id=" + id + ", name=" + name + ", serviceDescrip=" + serviceDescrip + ", base=" + base + ", targets=" + targets + ", event=" + events + ", alive=" + alive + '}';
     }
 
 }
