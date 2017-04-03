@@ -10,6 +10,7 @@ import ge.ambro.discoveryservice.repo.ServiceRepository;
 import ge.ambro.jerseyutils.inject.Component;
 import ge.ambro.jerseyutils.inject.ComponentFactory;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.glassfish.hk2.api.ServiceLocator;
 
 /**
@@ -22,7 +23,7 @@ public class Repositories {
     @Inject
     ServiceLocator locator;
 
-    @Component
+    @Component @Singleton
     public ServiceRepository getServiceRepository() {
         return locator.createAndInitialize(InmemoryServiceRepository.class);
     }

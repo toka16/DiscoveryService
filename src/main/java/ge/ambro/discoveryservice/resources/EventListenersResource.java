@@ -5,15 +5,14 @@
  */
 package ge.ambro.discoveryservice.resources;
 
-import ge.ambro.discoveryservice.dto.ResolvedTargetResponseDTO;
+import ge.ambro.discoveryservice.dto.EventResponseDTO;
 import ge.ambro.discoveryservice.repo.ServiceRepository;
-import javax.enterprise.inject.Default;
+import java.util.Collection;
 import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
@@ -27,22 +26,23 @@ import javax.ws.rs.core.Response;
  *
  * @author tabramishvili
  */
-@Path("v1/targets")
+@Path("v1/event-listeners")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class TargetsResource {
+public class EventListenersResource {
 
     @Inject
     ServiceRepository repo;
 
     @GET
-    public ResolvedTargetResponseDTO findTargetsByAddress(
-            @QueryParam("address") String address,
-            @DefaultValue("0") @QueryParam("ts") long ts) {
+    public Collection<EventResponseDTO> getEventListeners(
+            @QueryParam("name") String name,
+            @QueryParam("ts") long ts) {
         if (repo.getLastModifiedTime() > ts) {
-            return repo.getByAddress(address);
+            return repo.getEventListeners(name);
         } else {
             throw new WebApplicationException(Response.Status.NOT_MODIFIED);
         }
+
     }
 }

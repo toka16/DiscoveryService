@@ -60,9 +60,17 @@ public class ServicesResource {
     public ServiceDTO getService(@PathParam("service_id") int id) {
         return repo.get(id);
     }
-    
+
+    @PUT
+    @Path("{service_id}")
+    public void serviceSetAlive(@PathParam("service_id") int id, String data) {
+        boolean val = Boolean.valueOf(data.substring(data.indexOf(":") + 1, data.length() - 1).trim());
+        repo.setAlive(id, val);
+    }
+
     @POST
     public int addService(ServiceDTO service) {
+        System.out.println("new service: "+service);
         if (!validator.test(service)) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
