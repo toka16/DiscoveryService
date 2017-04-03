@@ -5,6 +5,7 @@
  */
 package ge.ambro.discoveryservice.repo;
 
+import ge.ambro.discoveryservice.dto.EventResponseDTO;
 import ge.ambro.discoveryservice.dto.ResolvedTargetResponseDTO;
 import ge.ambro.discoveryservice.dto.ServiceDTO;
 import ge.ambro.discoveryservice.dto.TargetResponseDTO;
@@ -27,6 +28,7 @@ public class InmemoryServiceRepository implements ServiceRepository {
 
     private final Map<Integer, ServiceDTO> servicesById;
     private final MultivaluedHashMap<String, ServiceDTO> servicesByName;
+    private final MultivaluedHashMap<String, EventResponseDTO> servicesByEvent;
 
     private final AtomicInteger idCounter;
     private long lastModifiedTime;
@@ -34,6 +36,7 @@ public class InmemoryServiceRepository implements ServiceRepository {
     public InmemoryServiceRepository() {
         servicesById = new ConcurrentHashMap<>();
         servicesByName = new MultivaluedHashMap<>();
+        servicesByEvent = new MultivaluedHashMap<>();
         idCounter = new AtomicInteger();
     }
 
@@ -65,7 +68,13 @@ public class InmemoryServiceRepository implements ServiceRepository {
     protected Map<String, Collection<TargetResponseDTO>> resolve(
             Collection<TargetResponseDTO> targets,
             Map<String, Collection<TargetResponseDTO>> resolves) {
+        if (targets == null) {
+            return null;
+        }
         targets.forEach((target) -> {
+            if (target.getDependencies() == null) {
+                return;
+            }
             target.getDependencies().forEach((dependency) -> {
                 if (!resolves.containsKey(dependency.getAddress())) {
                     Collection<TargetResponseDTO> tmp = getTargetResponses(dependency.getAddress());
@@ -104,6 +113,18 @@ public class InmemoryServiceRepository implements ServiceRepository {
         item.setAlive(true);
         servicesById.put(item.getId(), item);
         servicesByName.add(item.getName(), item);
+        if (item.getEvents() != null) {
+            item.getEvents().forEach((event) -> {
+                EventResponseDTO ev = new EventResponseDTO();
+                ev.setName(event.getName());
+                ev.setPath(event.getPath());
+                ev.setMethod(event.getMethod());
+                ev.setBase(item.getBase());
+                ev.setService(item.getName());
+                ev.setServiceId(item.getId());
+                servicesByEvent.add(ev.getName(), ev);
+            });
+        }
         lastModifiedTime = System.currentTimeMillis();
         return item.getId();
     }
@@ -111,7 +132,17 @@ public class InmemoryServiceRepository implements ServiceRepository {
     @Override
     public synchronized void remove(int id) {
         ServiceDTO item = servicesById.remove(id);
+        if (item == null) {
+            return;
+        }
         servicesByName.get(item.getName()).remove(item);
+        if (item.getEvents() != null) {
+            item.getEvents().forEach((event) -> {
+                servicesByEvent.get(event.getName()).removeIf((ev) -> {
+                    return ev.getServiceId() == id;
+                });
+            });
+        }
         lastModifiedTime = System.currentTimeMillis();
     }
 
@@ -124,6 +155,13 @@ public class InmemoryServiceRepository implements ServiceRepository {
     @Override
     public long getLastModifiedTime() {
         return lastModifiedTime;
+    }
+
+    @Override
+    public Collection<EventResponseDTO> getEventListeners(String address) {
+        return servicesByEvent.get(address).stream().filter((ev) -> {
+            return get(ev.getServiceId()).isAlive();
+        }).collect(Collectors.toList());
     }
 
 }

@@ -5,6 +5,7 @@
  */
 package ge.ambro.discoveryservice.repo;
 
+import ge.ambro.discoveryservice.dto.EventResponseDTO;
 import ge.ambro.discoveryservice.dto.ResolvedTargetResponseDTO;
 import ge.ambro.discoveryservice.dto.ServiceDTO;
 import java.util.Collection;
@@ -23,6 +24,8 @@ public interface ServiceRepository {
     Collection<ServiceDTO> getByName(String name);
 
     ResolvedTargetResponseDTO getByAddress(String address);
+    
+    Collection<EventResponseDTO> getEventListeners(String address);
 
     int add(ServiceDTO item);
 

@@ -61,11 +61,11 @@ public class ServiceDTO {
         this.targets = targets;
     }
 
-    public List<EventDTO> getEvent() {
+    public List<EventDTO> getEvents() {
         return events;
     }
 
-    public void setEvent(List<EventDTO> event) {
+    public void setEvents(List<EventDTO> event) {
         this.events = event;
     }
 
