@@ -60,7 +60,7 @@ public class ServicesResource {
     public ServiceDTO getService(@PathParam("service_id") int id) {
         return repo.get(id);
     }
-
+    
     @POST
     public int addService(ServiceDTO service) {
         if (!validator.test(service)) {
