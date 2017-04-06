@@ -9,6 +9,7 @@ import ge.ambro.discoveryservice.dto.EventResponseDTO;
 import ge.ambro.discoveryservice.dto.ResolvedTargetResponseDTO;
 import ge.ambro.discoveryservice.dto.ServiceDTO;
 import ge.ambro.discoveryservice.dto.TargetResponseDTO;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -109,6 +110,14 @@ public class InmemoryServiceRepository implements ServiceRepository {
 
     @Override
     public synchronized int add(ServiceDTO item) {
+        servicesByName.getOrDefault(item.getName(), Arrays.asList())
+                .stream()
+                .filter((s) -> {
+                    return s.getName().equals(item.getName()) && s.getBase().equals(item.getBase());
+                }).collect(Collectors.toList())
+                .forEach((old) -> {
+                    remove(old.getId());
+                });
         item.setId(idCounter.getAndIncrement());
         item.setAlive(true);
         servicesById.put(item.getId(), item);
