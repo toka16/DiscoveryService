@@ -7,16 +7,13 @@ package ge.ambro.discoveryservice.resources;
 
 import ge.ambro.discoveryservice.dto.ResolvedTargetResponseDTO;
 import ge.ambro.discoveryservice.repo.ServiceRepository;
-import javax.enterprise.inject.Default;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PUT;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -30,6 +27,7 @@ import javax.ws.rs.core.Response;
 @Path("v1/targets")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed("microservice")
 public class TargetsResource {
 
     @Inject

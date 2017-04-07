@@ -4,7 +4,7 @@
 
     <groupId>ge.ambro</groupId>
     <artifactId>DiscoveryService</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.2.0</version>
     <packaging>war</packaging>
 
     <name>DiscoveryService</name>
@@ -23,10 +23,21 @@
     </repositories>
     
     <dependencies>
-        <dependency>
+        <!--        <dependency>
             <groupId>com.github.toka16</groupId>
             <artifactId>JerseyUtils</artifactId>
             <version>v0.1</version>
+        </dependency>-->
+        <dependency>
+            <groupId>ge.ambro</groupId>
+            <artifactId>JerseyUtils</artifactId>
+            <version>v0.1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>3.1.0</version>
         </dependency>
         
         <dependency>

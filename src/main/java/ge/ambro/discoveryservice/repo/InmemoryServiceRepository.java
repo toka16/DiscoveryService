@@ -157,8 +157,11 @@ public class InmemoryServiceRepository implements ServiceRepository {
 
     @Override
     public synchronized void setAlive(int id, boolean value) {
-        get(id).setAlive(value);
-        lastModifiedTime = System.currentTimeMillis();
+        ServiceDTO service = get(id);
+        if (service != null) {
+            service.setAlive(value);
+            lastModifiedTime = System.currentTimeMillis();
+        }
     }
 
     @Override

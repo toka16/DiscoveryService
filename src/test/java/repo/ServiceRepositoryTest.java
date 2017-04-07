@@ -31,12 +31,16 @@ public class ServiceRepositoryTest {
     ServiceRepository repo;
     ServiceDTO tempServiceDTO;
 
-    private ServiceDTO createServiceDTO(String name) {
+    private ServiceDTO createServiceDTO(String name, String path) {
         ServiceDTO temp = new ServiceDTO();
         temp.setName(name);
-        temp.setBase("http://localhost/api/" + name);
-        temp.setServiceDescrip("local service: " + name);
+        temp.setBase("http://localhost/api/" + path);
+        temp.setServiceDescrip("local service: " + path);
         return temp;
+    }
+
+    private ServiceDTO createServiceDTO(String name) {
+        return createServiceDTO(name, name);
     }
 
     private TargetDTO createTargetDTO(String name, String path) {
@@ -109,7 +113,7 @@ public class ServiceRepositoryTest {
     @Test
     public void testAddTwoAndGetByName() {
         ServiceDTO temp = createServiceDTO("other_service");
-        ServiceDTO temp2 = createServiceDTO("other_service");
+        ServiceDTO temp2 = createServiceDTO("other_service", "other_path");
         int i = repo.add(temp);
         int i2 = repo.add(temp2);
 

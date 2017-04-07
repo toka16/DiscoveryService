@@ -23,8 +23,10 @@ public class Repositories {
     @Inject
     ServiceLocator locator;
 
-    @Component @Singleton
+    @Component
+    @Singleton
     public ServiceRepository getServiceRepository() {
         return locator.createAndInitialize(InmemoryServiceRepository.class);
     }
+
 }

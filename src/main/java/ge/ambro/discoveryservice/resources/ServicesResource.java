@@ -7,16 +7,10 @@ package ge.ambro.discoveryservice.resources;
 
 import ge.ambro.discoveryservice.dto.ServiceDTO;
 import ge.ambro.discoveryservice.injections.Validators;
-import ge.ambro.discoveryservice.repo.InmemoryServiceRepository;
 import ge.ambro.discoveryservice.repo.ServiceRepository;
 import java.util.Collection;
-import java.util.List;
-import java.util.function.Predicate;
-import javax.annotation.PostConstruct;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.GET;
@@ -36,6 +30,7 @@ import javax.ws.rs.core.Response;
 @Path("v1/services")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@RolesAllowed("microservice")
 public class ServicesResource {
 
     @Inject
