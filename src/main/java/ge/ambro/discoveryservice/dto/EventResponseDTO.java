@@ -9,7 +9,7 @@ package ge.ambro.discoveryservice.dto;
  *
  * @author tabramishvili
  */
-public class EventResponseDTO extends AbstractEndpoint {
+public class EventResponseDTO extends EventDTO {
 
     private int serviceId;
     private String service;
@@ -37,6 +37,11 @@ public class EventResponseDTO extends AbstractEndpoint {
 
     public void setBase(String base) {
         this.base = base;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " EventResponseDTO{" + "serviceId=" + serviceId + ", service=" + service + ", base=" + base + '}';
     }
 
 }
