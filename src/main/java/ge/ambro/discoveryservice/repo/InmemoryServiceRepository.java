@@ -48,6 +48,9 @@ public class InmemoryServiceRepository implements ServiceRepository {
 
     @Override
     public synchronized int add(ServiceDTO item) {
+        if (servicesById.containsKey(item.getId())) {
+            return 0;
+        }
         servicesById.put(item.getId(), item);
         servicesByName.add(item.getName(), item);
         if (item.getEvents() != null) {
