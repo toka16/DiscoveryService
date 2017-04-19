@@ -5,8 +5,9 @@
  */
 package ge.ambro.discoveryservice.resources;
 
-import ge.ambro.discoveryservice.dto.ResolvedTargetResponseDTO;
+import ge.ambro.discoveryservice.dto.ServiceDTO;
 import ge.ambro.discoveryservice.repo.ServiceRepository;
+import java.util.Collection;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Produces;
@@ -34,11 +35,11 @@ public class TargetsResource {
     ServiceRepository repo;
 
     @GET
-    public ResolvedTargetResponseDTO findTargetsByAddress(
-            @QueryParam("address") String address,
+    public Collection<ServiceDTO> findTargetsByName(
+            @QueryParam("name") String name,
             @DefaultValue("0") @QueryParam("ts") long ts) {
         if (repo.getLastModifiedTime() > ts) {
-            return repo.getByAddress(address);
+            return repo.getByName(name);
         } else {
             throw new WebApplicationException(Response.Status.NOT_MODIFIED);
         }

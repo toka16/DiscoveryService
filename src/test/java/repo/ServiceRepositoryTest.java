@@ -5,14 +5,9 @@
  */
 package repo;
 
-import ge.ambro.discoveryservice.dto.DependencyDTO;
 import ge.ambro.discoveryservice.dto.EventDTO;
 import ge.ambro.discoveryservice.dto.EventResponseDTO;
-import ge.ambro.discoveryservice.dto.HttpMethod;
-import ge.ambro.discoveryservice.dto.ResolvedTargetResponseDTO;
 import ge.ambro.discoveryservice.dto.ServiceDTO;
-import ge.ambro.discoveryservice.dto.TargetDTO;
-import ge.ambro.discoveryservice.dto.TargetResponseDTO;
 import ge.ambro.discoveryservice.repo.InmemoryServiceRepository;
 import ge.ambro.discoveryservice.repo.ServiceRepository;
 import java.util.Arrays;
@@ -30,9 +25,11 @@ public class ServiceRepositoryTest {
 
     ServiceRepository repo;
     ServiceDTO tempServiceDTO;
+    int id = 1;
 
     private ServiceDTO createServiceDTO(String name, String path) {
         ServiceDTO temp = new ServiceDTO();
+        temp.setId(id++);
         temp.setName(name);
         temp.setBase("http://localhost/api/" + path);
         temp.setServiceDescrip("local service: " + path);
@@ -43,25 +40,9 @@ public class ServiceRepositoryTest {
         return createServiceDTO(name, name);
     }
 
-    private TargetDTO createTargetDTO(String name, String path) {
-        TargetDTO target = new TargetDTO();
-        target.setName(name);
-        target.setMethod(HttpMethod.GET);
-        target.setPath(path);
-        return target;
-    }
-
-    private DependencyDTO createDependencyDTO(String address, int priority) {
-        DependencyDTO dep = new DependencyDTO();
-        dep.setAddress(address);
-        dep.setPriority(priority);
-        return dep;
-    }
-
     private EventDTO createEventDTO(String name) {
         EventDTO event = new EventDTO();
         event.setName(name);
-        event.setMethod(HttpMethod.GET);
         event.setPath("path/" + name);
         return event;
     }
@@ -127,98 +108,6 @@ public class ServiceRepositoryTest {
     }
 
     @Test
-    public void testSearchByAddressWithOneTargetWithoutDependencies() {
-        ServiceDTO service = createServiceDTO("service");
-        TargetDTO target = createTargetDTO("target", "/path");
-        service.setTargets(Arrays.asList(target));
-        repo.add(service);
-
-        ResolvedTargetResponseDTO response = repo.getByAddress("service:target");
-        Assert.assertEquals("Number of targets must be 1", 1, response.getTargets().size());
-
-        TargetResponseDTO resTarget = (TargetResponseDTO) response.getTargets().toArray()[0];
-        checkTargetResponse(service, target, resTarget);
-    }
-
-    @Test
-    public void testSearchByAddressWithMultipleTargetsWithoutDependencies() {
-        ServiceDTO service = createServiceDTO("service");
-        TargetDTO target = createTargetDTO("target", "path");
-        TargetDTO target2 = createTargetDTO("target", "path2");
-        service.setTargets(Arrays.asList(target, target2));
-        repo.add(service);
-
-        ResolvedTargetResponseDTO response = repo.getByAddress("service:target");
-        Assert.assertEquals("Check number of targets", service.getTargets().size(), response.getTargets().size());
-
-        TargetResponseDTO resTarget = (TargetResponseDTO) response.getTargets().toArray()[0];
-        TargetResponseDTO resTarget2 = (TargetResponseDTO) response.getTargets().toArray()[1];
-
-        checkTargetResponse(service, target, resTarget);
-        checkTargetResponse(service, target2, resTarget2);
-    }
-
-    @Test
-    public void testSearchByAddressWithMultipleTargetsWithDependencies() {
-        ServiceDTO service = createServiceDTO("service");
-        TargetDTO target = createTargetDTO("target", "path");
-        service.setTargets(Arrays.asList(target));
-        repo.add(service);
-
-        ServiceDTO service2 = createServiceDTO("service2");
-        TargetDTO target2 = createTargetDTO("target2", "path2");
-        DependencyDTO dep = createDependencyDTO("service:target", 5);
-        target2.setDependencies(Arrays.asList(dep));
-        service2.setTargets(Arrays.asList(target2));
-        repo.add(service2);
-
-        ResolvedTargetResponseDTO response = repo.getByAddress("service2:target2");
-        Assert.assertEquals("Check number of targets", service.getTargets().size(), response.getTargets().size());
-
-        Map<String, Collection<TargetResponseDTO>> resolves = response.getResolves();
-        Assert.assertEquals("Check number of resolves", 1, resolves.size());
-
-        Collection<TargetResponseDTO> resTargetColl = resolves.get("service:target");
-        Assert.assertEquals(1, resTargetColl.size());
-        TargetResponseDTO resTarget = (TargetResponseDTO) resTargetColl.toArray()[0];
-
-        checkTargetResponse(service, target, resTarget);
-    }
-
-    @Test
-    public void testSearchByAddressWithMultipleServicesMultipleTargetsMultipleDependencies() {
-        ServiceDTO service1 = createServiceDTO("service1");
-        TargetDTO target11 = createTargetDTO("target11", "path11");
-        TargetDTO target12 = createTargetDTO("target", "path");
-        service1.setTargets(Arrays.asList(target11, target12));
-        repo.add(service1);
-
-        ServiceDTO service2 = createServiceDTO("service2");
-        TargetDTO target21 = createTargetDTO("target", "other/path");
-        DependencyDTO dep21 = createDependencyDTO("service1:target11", 10);
-        target21.setDependencies(Arrays.asList(dep21));
-        TargetDTO target22 = createTargetDTO("target22", "path22");
-        DependencyDTO dep221 = createDependencyDTO("service1:target", 10);
-        DependencyDTO dep222 = createDependencyDTO("service2:target", 5);
-        target22.setDependencies(Arrays.asList(dep221, dep222));
-        service2.setTargets(Arrays.asList(target21, target22));
-        repo.add(service2);
-
-        ResolvedTargetResponseDTO response;
-        response = repo.getByAddress("service1:target");
-        Assert.assertTrue("Target has no dependencies", response.getResolves().isEmpty());
-
-        response = repo.getByAddress("service2:target");
-        Assert.assertEquals("Target has 1 dependencies", 1, response.getResolves().size());
-
-        response = repo.getByAddress("service2:target22");
-        Assert.assertEquals("Target has 3 dependencies", 3, response.getResolves().size());
-        Assert.assertTrue("Taregt depends on service1:target", response.getResolves().containsKey("service1:target"));
-        Assert.assertTrue("Taregt depends on service2:target", response.getResolves().containsKey("service2:target"));
-        Assert.assertTrue("Taregt transparently depends on service1:target11", response.getResolves().containsKey("service1:target11"));
-    }
-
-    @Test
     public void checkSingleEventListener() {
         ServiceDTO service = createServiceDTO("service");
         EventDTO event = createEventDTO("event");
@@ -259,85 +148,19 @@ public class ServiceRepositoryTest {
     }
 
     @Test
-    public void testSearchByUnknownAddress() {
-        ResolvedTargetResponseDTO response = repo.getByAddress("some:address");
-        Assert.assertTrue("Has no targets", response.getTargets().isEmpty());
-        Assert.assertTrue("Has no dependencies", response.getResolves().isEmpty());
-    }
-
-    @Test
     public void testRemove() {
         ServiceDTO service = createServiceDTO("service");
-        TargetDTO target = createTargetDTO("target", "path");
-        service.setTargets(Arrays.asList(target));
         EventDTO event = createEventDTO("event");
         service.setEvents(Arrays.asList(event));
         int index = repo.add(service);
 
         repo.remove(index);
 
-        ResolvedTargetResponseDTO response = repo.getByAddress("service:target");
-        Assert.assertTrue("Has no targets", response.getTargets().isEmpty());
-        Assert.assertTrue("Has no dependencies", response.getResolves().isEmpty());
+        Collection<ServiceDTO> response = repo.getByName("service");
+        Assert.assertTrue("Has no targets", response.isEmpty());
 
         Collection<EventResponseDTO> listeners = repo.getEventListeners("event");
         Assert.assertTrue("Has no listeners", listeners.isEmpty());
-    }
-
-    @Test
-    public void checkAliveServices() {
-        ServiceDTO service = createServiceDTO("service");
-        TargetDTO target = createTargetDTO("target", "path");
-        service.setTargets(Arrays.asList(target));
-        EventDTO event = createEventDTO("event");
-        service.setEvents(Arrays.asList(event));
-        int index = repo.add(service);
-
-        repo.setAlive(index, false);
-
-        ResolvedTargetResponseDTO response = repo.getByAddress("service:target");
-        Assert.assertTrue("Has no targets", response.getTargets().isEmpty());
-        Assert.assertTrue("Has no dependencies", response.getResolves().isEmpty());
-
-        Collection<EventResponseDTO> listeners = repo.getEventListeners("event");
-        Assert.assertTrue("Has no listeners", listeners.isEmpty());
-    }
-
-    @Test
-    public void checkMixedAliveServices() {
-        ServiceDTO service = createServiceDTO("service");
-        TargetDTO target = createTargetDTO("target", "path");
-        service.setTargets(Arrays.asList(target));
-        EventDTO event = createEventDTO("event");
-        service.setEvents(Arrays.asList(event));
-        int index = repo.add(service);
-
-        ServiceDTO service2 = createServiceDTO("service2");
-        TargetDTO target2 = createTargetDTO("target2", "path");
-        service2.setTargets(Arrays.asList(target2));
-        EventDTO event2 = createEventDTO("event2");
-        service2.setEvents(Arrays.asList(event2));
-        int index2 = repo.add(service2);
-
-        repo.setAlive(index, false);
-
-        ResolvedTargetResponseDTO response = repo.getByAddress("service:target");
-        Assert.assertTrue("Has no targets", response.getTargets().isEmpty());
-        Assert.assertTrue("Has no dependencies", response.getResolves().isEmpty());
-
-        Collection<EventResponseDTO> listeners = repo.getEventListeners("event");
-        Assert.assertTrue("Has no listeners", listeners.isEmpty());
-
-        Assert.assertEquals("Should have one target", 1, repo.getByAddress("service2:target2").getTargets().size());
-        Assert.assertEquals("Should have one listener", 1, repo.getEventListeners("event2").size());
-    }
-
-    private void checkTargetResponse(ServiceDTO service, TargetDTO target, TargetResponseDTO resTarget) {
-        Assert.assertEquals(target.getName(), resTarget.getName());
-        Assert.assertEquals(target.getMethod(), resTarget.getMethod());
-        Assert.assertEquals(service.getBase(), resTarget.getBase());
-        Assert.assertEquals(service.getName(), resTarget.getService());
-        Assert.assertEquals(service.getId(), resTarget.getServiceId());
     }
 
 }

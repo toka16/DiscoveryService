@@ -12,11 +12,11 @@ import java.util.Collection;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Produces;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -56,20 +56,20 @@ public class ServicesResource {
         return repo.get(id);
     }
 
-    @PUT
-    @Path("{service_id}")
-    public void serviceSetAlive(@PathParam("service_id") int id, String data) {
-        boolean val = Boolean.valueOf(data.substring(data.indexOf(":") + 1, data.length() - 1).trim());
-        repo.setAlive(id, val);
-    }
-
     @POST
     public int addService(ServiceDTO service) {
-        System.out.println("new service: "+service);
+        System.out.println("new service: " + service);
         if (!validator.test(service)) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
         return repo.add(service);
+    }
+
+    @DELETE
+    @Path("{id}")
+    public void deleteService(@PathParam("id") int id) {
+        System.out.println("delete service: " + id);
+        repo.remove(id);
     }
 
 }

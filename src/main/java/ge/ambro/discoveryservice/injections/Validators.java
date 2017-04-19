@@ -33,10 +33,10 @@ public class Validators {
 
         @Override
         public boolean test(ServiceDTO t) {
-            return stringNotNullOrEmpty(t.getBase())
-                    && stringNotNullOrEmpty(t.getName())
-                    && ((t.getEvents() != null && t.getEvents().size() > 0)
-                    || (t.getTargets() != null && t.getTargets().size() > 0));
+            return t != null
+                    && t.getId() > 0
+                    && stringNotNullOrEmpty(t.getBase())
+                    && stringNotNullOrEmpty(t.getName());
         }
     }
 }
